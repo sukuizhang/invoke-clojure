@@ -1,0 +1,36 @@
+invoke
+
+simple invoke clj tools.
+
+Usage
+   
+ServerSide
+   1.add dependency [invoke-clojure "0.0.1"] into your project.clj.
+
+   2.write your functions in your xyz.clj...
+
+   3.in your main.clj, you can require or use your other namespace.
+
+   4.add require [invoke-clojure.core :as invoke], and execute:
+      (invoke/start & [your options])
+    then start invoke server.
+   
+  5.options:
+    :ns special your namespace to be invoke, any of function that can directly visit in this namespace can be invoke from client side, include that you write in this namespace and functions in namespace that you has use or require.
+    :remove-ns special namespace that you do not want to visit it, default, clojure.core and invoke-clojure.core is exclude.
+    :port server start port.
+
+  6.follow is invoke example:
+    if you has define functions below:
+(defn f1 [a b] (+ a b))
+(defn f2 [a b c] (* a b c))
+(defn f3 [u v w] [(f1 u v) (f2 u v w)])
+(defn f4 ([u v w] [u v w]) ([a b] [a b]))
+(defn person [name sex age] {:name name :sex sex :age age})
+   then you can invoke them in browser use:
+;http://localhost:8080/invoke?function=f1&a=3&b=4
+;http://localhost:8080/invoke?function=f2&a=3&b=4&c=7
+;http://localhost:8080/invoke?function=f3&u=3&v=4&w=13
+;http://localhost:8080/invoke?function=f4&u=3&v=4&w=13&arg-index=0
+;http://localhost:8080/invoke?function=f4&a=7&b=8&arg-index=1
+;http://localhost:8080/invoke?function=person&name="zrr"&sex=:female&age=29
