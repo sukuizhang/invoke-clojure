@@ -1,13 +1,23 @@
 # example
 
-FIXME: write description
+simple invoke example
 
-## Usage
+sample functons and urls:
 
-FIXME: write
+    in example.example1:
+       (defn f4 ([u v w] [u v w]) ([a b] [a b]))
+       (defn person [name sex age] {:name name :sex sex :age age})
 
-## License
+    in example.example:
+       (defn f4 ([u v w] [u v w]) ([a b] [a b]))
+       (defn person [name sex age] {:name name :sex sex :age age})
 
-Copyright (C) 2011 FIXME
+    and we example.example,we require [example.example1 :as example1]
+    we invoke these functions in example.example,follow is the corresponding urls:   
+    http://localhost:8080/f4?u=3&v=4&w=13&arg-index=0
+    http://localhost:8080/f4_1?a=7&b=8
+    http://localhost:8080/person?name="zrr"&sex=:female&age=29
 
-Distributed under the Eclipse Public License, the same as Clojure.
+    http://localhost:8080/example1/f1?af4?u=3&v=4&w=13&arg-index=0
+    http://localhost:8080/example1/f1?af4_1?a=7&b=8
+    http://localhost:8080/example1/f1?aperson?name="zrr"&sex=:female&age=29

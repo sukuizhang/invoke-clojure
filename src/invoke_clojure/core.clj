@@ -5,13 +5,19 @@
             [compojure.route :as route]            
             [compojure.handler :as handler]))
 
+(defn handle-request [request & [ops]]
+  (println request)
+  (render
+   (let [uri (request :uri)
+         f-name (.substring uri 1)]
+     (if (= "help" f-name)
+       (function/function-args ops)
+       (function/invoke f-name (request :params) ops))
+     ) request))
 
 (defn mk-handler [& [ops]]
-  (-> (defroutes main-routes
-        (ANY "/help" [] (function/function-args ops))
-        (ANY "/invoke" {params :params}
-             (function/invoke params ops))
-        (route/not-found "invalid url"))
+  (-> (fn [request]
+        (handle-request request ops))
       (handler/api)))
 
 (def jetty-instance (atom nil))

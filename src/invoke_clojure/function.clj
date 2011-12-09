@@ -15,7 +15,6 @@
 
 (defn functions [& [ops]]
   (let [ns (or (:ns ops) *ns*)
-        _ (println ns)
         r-ns (or (:remove-ns ops) #{(find-ns 'clojure.core)})
         f-mappings (doto (.getDeclaredField (type *ns*) "mappings")
                      (.setAccessible true))
@@ -45,33 +44,40 @@
        (interpose "\n")
        (apply str)))
 
+(defn unwrap-argindex
+  [f-name]
+  (let [f-name (name f-name)
+        idx (.indexOf f-name (int \_))]
+    (if (= -1 idx)
+      [f-name 0]
+      (try
+        [(.substring f-name 0 idx) (Integer/parseInt (.substring f-name (+ 1 idx)))]
+        (catch NumberFormatException e [f-name 0])))))
+
 (defn invoke
-  [request & [ops]]
-  (println (str "request:" request))
-  (let [var-f ((into {} (functions ops)) (symbol (:function request)))
-        argindex (if (request :argindex)
-                   (Integer/parseInt (request :argindex))
-                   0)]
-    (cond (not var-f)
-          (str "function " (:function request) " not found")
-          (not (fn? (var-get var-f)))
-          (str (:function request) " not a function ")
-          :else
-          (let [arg-value (fn [key] (let [t (request key)]
-                                     (if t
-                                       (load-string t)
-                                       nil)))
-                args (-> (meta var-f)
-                         :arglists
-                         (nth argindex)
-                         resolve-arglist
-                         (#(map arg-value %)))
-                f (var-get var-f)]
-            (try
-              (-> (apply f args) str)
-              (catch Exception e
+  [f-name f-args & [ops]]
+  (try
+    (let [[f-name argindex] (unwrap-argindex f-name)
+          var-f ((into {} (functions ops)) (symbol f-name))]
+      (cond (not var-f)
+            (str "function " f-name " not found")
+            (not (fn? (var-get var-f)))
+            (str f-name " not a function ")
+            :else
+            (let [arg-value (fn [key] (let [t (f-args key)]
+                                       (if t
+                                         (load-string (str t))
+                                         nil)))
+                  args (-> (meta var-f)
+                           :arglists
+                           (nth argindex)
+                           resolve-arglist
+                           (#(map arg-value %)))
+                  f (var-get var-f)]
+              (-> (apply f args) str))))
+    (catch Exception e
                 (let [o (ByteArrayOutputStream.)
                       p (PrintStream. o)]
                   (.printStackTrace e p)
                   (.flush o)
-                  (.toString o))))))))
+                  (.toString o)))))
