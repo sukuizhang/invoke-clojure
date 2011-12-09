@@ -16,4 +16,5 @@ temp
 *.gz
 .#*
 logs/
+pom.xml
 .lein*
